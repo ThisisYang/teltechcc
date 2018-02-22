@@ -58,5 +58,5 @@ func waitSingal() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
 	<-sigs
-	Debug.Println("received signal")
+	Info.Println("received signal")
 }
