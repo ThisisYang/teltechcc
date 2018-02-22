@@ -56,7 +56,11 @@ $ docker build -t {tag} .
 $ docker run -d -p 80:8000  {image_id} --debug=true --redis redis://{redis_ip}:{redis_port}/{DB}
 ```
 
-## Others:
+### Others:
 If you want to, you can use other cache backend (`memcached`,`redshift` or even persistent database) as long as you implement `cacheClient` interface.
 
 It is not suggested to use default cache (local memory) as there is not limit on the size of internal map. Also, there will be a goroutine running at the background to scan the entire map every second to remove expired keys. This will lock the memory and block other goroutine accessing it.
+
+### Issues:
+
+Currently it only handles `int` operation. Since `int` in golang is 32 bit, it has range -2147483648 through 2147483647. If x or y has value beyond range, server will return `400`. If the result is beyond the range, server will still return `200` with incorrect value.
