@@ -35,10 +35,13 @@ example output:
 ### Flags
 4 flags are available:
 ```go
-    var ip = flag.String("ip", "0.0.0.0", "IP server bind to")
-    var port = flag.Int("port", 8000, "port server listen on")
-    var redisURL = flag.String("redis", "", "redis url. for example: `redis://localhost:6379`. If not set, will use local memory instead of redis as cache")
-    var debug = flag.Bool("debug", false, "boolean field, set to enable debug mode")
+    var (
+        ip       = flag.String("ip", "0.0.0.0", "IP server bind to")
+        port     = flag.Int("port", 8000, "port server listen on")
+        redisURL = flag.String("redis", "", "redis url. for example: `redis://localhost:6379`. If not set, will use local memory instead of redis as cache")
+        debug    = flag.Bool("debug", false, "boolean field, set to enable debug mode")
+        flush    = flag.Bool("flush", false, "boolean, set true if to flush db on boot.")
+    )
 ```
 By default, server will bu functional without passing any flag. Local memory will be used as cache. In this way, you don't have to setup redis.
 
@@ -64,3 +67,8 @@ It is not suggested to use default cache (local memory) as there is not limit on
 ### Issues:
 
 Currently it only handles `int` operation. Since `int` in golang is 32 bit, it has range -2147483648 through 2147483647. If x or y has value beyond range, server will return `400`. If the result is beyond the range, server will still return `200` with incorrect value.
+
+Cached period is now fixed, 60 second. In order to be flexiable, need to re-work on `cacheClient` interface. Roadmap could be:
+1. accpet flag of `Int` type which define the `TTL`.
+2. include `TTL` within cacheClient struct.
+3. `Get` and `SetWithTTL` method will set TTL based on this value.

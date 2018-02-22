@@ -14,11 +14,13 @@ import (
 var cache cacheClient
 
 func main() {
-	var ip = flag.String("ip", "0.0.0.0", "IP server bind to")
-	var port = flag.Int("port", 8000, "port server listen on")
-	var redisURL = flag.String("redis", "", "redis url. for example: `redis://localhost:6379`. If not set, will use local memory instead of redis as cache")
-	var debug = flag.Bool("debug", false, "boolean field, set to enable debug mode")
-
+	var (
+		ip       = flag.String("ip", "0.0.0.0", "IP server bind to")
+		port     = flag.Int("port", 8000, "port server listen on")
+		redisURL = flag.String("redis", "", "redis url. for example: `redis://localhost:6379`. If not set, will use local memory instead of redis as cache")
+		debug    = flag.Bool("debug", false, "boolean field, set to enable debug mode")
+		flush    = flag.Bool("flush", false, "boolean, set true if to flush db on boot")
+	)
 	flag.Parse()
 
 	setUpLogger(*debug)
@@ -27,6 +29,10 @@ func main() {
 		cache = cacheMe.NewRedisClient(*redisURL)
 	} else {
 		cache = cacheMe.NewDefaultClient()
+	}
+
+	if *flush {
+		cache.Flush()
 	}
 
 	defer cache.Close()

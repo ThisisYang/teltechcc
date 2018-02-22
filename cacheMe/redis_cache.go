@@ -8,28 +8,29 @@ import (
 
 var redisCounter = "hit"
 
-type redisClient struct {
+// RedisClient struct
+type RedisClient struct {
 	client *redis.Client
 }
 
-func NewRedisClient(redisURL string) *redisClient {
-	//c, err := redis.DialURL(os.Getenv("REDIS_URL"))
+// NewRedisClient return a new RedisClient
+func NewRedisClient(redisURL string) *RedisClient {
 	opt, err := redis.ParseURL(redisURL)
 	if err != nil {
 		panic(err)
 	}
 	c := redis.NewClient(opt)
-	c.FlushDB()
-	return &redisClient{client: c}
+	return &RedisClient{client: c}
 }
 
-func (c *redisClient) Close() {
+// Close will close connection
+func (c *RedisClient) Close() {
 	c.client.Close()
 }
 
 // Get will use pipeline, return value, true if key exist, otherwise 0, false
-// get the value if cached and extend TTL
-func (c *redisClient) Get(key string) (int, bool) {
+// get the value if cached and extend TTL for 60 seconds
+func (c *RedisClient) Get(key string) (int, bool) {
 
 	pipe := c.client.TxPipeline()
 
@@ -58,34 +59,43 @@ func (c *redisClient) Get(key string) (int, bool) {
 	return v, true
 }
 
-func (c *redisClient) SetWithTTL(key string, value, seconds int) {
-	err := c.client.Set(key, value, time.Duration(seconds)*time.Second).Err()
+// SetWithTTL will set kv in redis with TTL
+func (c *RedisClient) SetWithTTL(key string, value int) {
+	err := c.client.Set(key, value, time.Minute).Err()
 	if err != nil {
 		fmt.Printf("set key err: %v\n", err)
 	}
 
 }
 
-func (c *redisClient) Ping() error {
+// Ping will ping redis
+func (c *RedisClient) Ping() error {
 	err := c.client.Ping().Err()
 	return err
 }
 
-func (c *redisClient) IncrCounter() {
+// IncrCounter will increment hit counter
+func (c *RedisClient) IncrCounter() {
 	err := c.client.Incr(redisCounter).Err()
 	if err != nil {
 		fmt.Printf("increment counter err: %v\n", err)
 	}
 }
 
-func (c *redisClient) GetCounter() int {
+// GetCounter will get hit counter
+func (c *RedisClient) GetCounter() int {
 	val := c.client.Get(redisCounter).Val()
 	v, _ := stringToInt(val)
 	return v
 }
 
 // GetSize will return size of DB, including counter
-func (c *redisClient) GetSize() int {
+func (c *RedisClient) GetSize() int {
 	val := c.client.DBSize().Val()
 	return int(val)
+}
+
+// Flush will flush redis db
+func (c *RedisClient) Flush() {
+	c.client.FlushDB()
 }

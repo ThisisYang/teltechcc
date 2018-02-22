@@ -57,6 +57,6 @@ func getResult(f string, x, y int) (int, bool) {
 		return result, cached
 	}
 	result = calculate(f, x, y)
-	cache.SetWithTTL(cacheKey, result, 60)
+	cache.SetWithTTL(cacheKey, result)
 	return result, cached
 }

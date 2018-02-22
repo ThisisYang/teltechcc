@@ -53,7 +53,7 @@ func (c *DefaultCache) Get(key string) (int, bool) {
 }
 
 // SetWithTTL will set the key value, and set expiration ts
-func (c *DefaultCache) SetWithTTL(key string, value, seconds int) {
+func (c *DefaultCache) SetWithTTL(key string, value int) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	exp := time.Now().Unix() + 60
@@ -87,6 +87,11 @@ func (c *DefaultCache) GetCounter() int {
 // This might not be accurate since the cronJob run every minute
 func (c *DefaultCache) GetSize() int {
 	return len(c.val)
+}
+
+// Flush assign new map to val
+func (c *DefaultCache) Flush() {
+	c.val = make(map[string]*valueStruct)
 }
 
 // cronJob will run periodically in background

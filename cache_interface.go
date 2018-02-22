@@ -4,6 +4,7 @@ type cacheClient interface {
 	Getter
 	Setter
 	Counter
+	Flusher
 	Ping() error
 	Close()
 }
@@ -16,7 +17,12 @@ type Getter interface {
 
 // Setter interface implement method of Set
 type Setter interface {
-	SetWithTTL(key string, value, seconds int)
+	SetWithTTL(key string, value int)
+}
+
+// Flusher implement Flush method
+type Flusher interface {
+	Flush()
 }
 
 // Counter implement IncrCounter, GetCounter and GetSize

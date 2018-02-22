@@ -19,7 +19,7 @@ func (f *fakeCacheClient) Get(key string) (int, bool) {
 	return val, ok
 }
 
-func (f *fakeCacheClient) SetWithTTL(key string, value, seconds int) {
+func (f *fakeCacheClient) SetWithTTL(key string, value int) {
 	f.val[key] = value
 }
 
@@ -40,3 +40,5 @@ func (f *fakeCacheClient) GetCounter() int {
 func (f *fakeCacheClient) GetSize() int {
 	return len(f.val)
 }
+
+func (f *fakeCacheClient) Flush() {}

@@ -61,19 +61,19 @@ func TestSetWithTTL(t *testing.T) {
 		val  int
 		sec  int
 	}{
-		{name: "case 1", key: "foo", val: 5, sec: 60},
-		{name: "case 2", key: "bar", val: 0, sec: 60},
-		{name: "case 3", key: "foo", val: 2, sec: 60},
+		{name: "case 1", key: "foo", val: 5},
+		{name: "case 2", key: "bar", val: 0},
+		{name: "case 3", key: "foo", val: 2},
 	}
 
 	for _, c := range cases {
-		redisC.SetWithTTL(c.key, c.val, c.sec)
+		redisC.SetWithTTL(c.key, c.val)
 		ttl := s.TTL(c.key)
 		if s.Exists(c.key) == false {
 			t.Errorf("error on: %v\nkey: %v not set", c.name, c.key)
 		}
-		if ttl != time.Duration(c.sec)*time.Second {
-			t.Errorf("error on: %v\ngot ttl:\n %v \nexp ttl\n %v \n", c.name, ttl, c.sec)
+		if ttl != time.Minute {
+			t.Errorf("error on: %v\ngot ttl:\n %v \nexp ttl\n %v \n", c.name, ttl, time.Minute)
 		}
 	}
 }
@@ -95,5 +95,55 @@ func TestIncrCounter(t *testing.T) {
 	}
 	if got != "6" {
 		t.Errorf("increment counter err, exp: 6, got: %v\n", got)
+	}
+}
+
+func TestGetCounter(t *testing.T) {
+	s, err := miniredis.Run()
+	if err != nil {
+		panic(err)
+	}
+	defer s.Close()
+	add := "redis://" + s.Addr()
+	redisC := NewRedisClient(add)
+	s.Set(redisCounter, "5")
+	got := redisC.GetCounter()
+	if got != 5 {
+		t.Errorf("redis get counter err, exp: 5, got: %v\n", got)
+	}
+}
+
+func TestGetSize(t *testing.T) {
+	s, err := miniredis.Run()
+	if err != nil {
+		panic(err)
+	}
+	defer s.Close()
+
+	add := "redis://" + s.Addr()
+	redisC := NewRedisClient(add)
+
+	s.Set("foo", "5")
+	s.Set("bar", "6")
+	got := redisC.GetSize()
+	if got != 2 {
+		t.Errorf("redis get size err, exp: 2, got: %v\n", got)
+	}
+}
+
+func TestFlush(t *testing.T) {
+	s, err := miniredis.Run()
+	if err != nil {
+		panic(err)
+	}
+	defer s.Close()
+
+	add := "redis://" + s.Addr()
+	redisC := NewRedisClient(add)
+	s.Set("foo", "5")
+	s.Set("bar", "6")
+	redisC.Flush()
+	if redisC.GetSize() != 0 {
+		t.Errorf("redis flush err, exp size: 0, got: %v\n", redisC.GetSize())
 	}
 }
