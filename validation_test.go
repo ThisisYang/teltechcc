@@ -9,9 +9,9 @@ func TestQSValidation(t *testing.T) {
 		name, x, y string
 		expErr     error
 	}{
-		{name: "case 1", x: "", y: "", expErr: errMissX},
-		{name: "case 2", x: "3", y: "", expErr: errMissY},
-		{name: "case 3", x: "3", y: "3", expErr: nil},
+		{name: "case miss x", x: "", y: "", expErr: errMissX},
+		{name: "case miss y", x: "3", y: "", expErr: errMissY},
+		{name: "case ok", x: "3", y: "3", expErr: nil},
 	}
 	for _, c := range cases {
 		gotErr := qsValidation(c.x, c.y)
@@ -27,9 +27,9 @@ func TestBaseValidation(t *testing.T) {
 		expX, expY int
 		expErr     error
 	}{
-		{name: "case 1", x: "3", y: "4", expX: 3, expY: 4, expErr: nil},
-		{name: "case 2", x: "a", y: "4", expX: 0, expY: 0, expErr: errType},
-		{name: "case 3", x: "3", y: "a", expX: 0, expY: 0, expErr: errType},
+		{name: "case ok", x: "3", y: "4", expX: 3, expY: 4, expErr: nil},
+		{name: "case x type err", x: "a", y: "4", expX: 0, expY: 0, expErr: errType},
+		{name: "case y type err", x: "3", y: "a", expX: 0, expY: 0, expErr: errType},
 	}
 	for _, c := range cases {
 		gotX, gotY, gotErr := baseValidation(c.x, c.y)
@@ -52,8 +52,8 @@ func TestDivValidation(t *testing.T) {
 		expX, expY int
 		expErr     error
 	}{
-		{name: "case 1", x: "3", y: "0", expX: 3, expY: 0, expErr: errDivideByZero},
-		{name: "case 2", x: "0", y: "4", expX: 0, expY: 4, expErr: nil},
+		{name: "case y==0", x: "3", y: "0", expX: 3, expY: 0, expErr: errDivideByZero},
+		{name: "case x==0", x: "0", y: "4", expX: 0, expY: 4, expErr: nil},
 	}
 	for _, c := range cases {
 		gotX, gotY, gotErr := divValidation(c.x, c.y)

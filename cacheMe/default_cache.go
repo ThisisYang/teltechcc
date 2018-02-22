@@ -11,7 +11,14 @@ type valueStruct struct {
 	expTS int64
 }
 
-// DefaultCache will use local memory
+// DefaultCache will use local memory.
+// All kv will be stored in a map
+// key of the map is the key value
+// value is pointer to struct valueStruct which store the value and expiration info
+// expiration ts will be the number of seconds elapsed since January 1, 1970 UTC
+// kv can expired (deleted) in 2 ways
+// 1. when accessing the cache via Get method, delete the kv if expired
+// 2. there will be a goroutine running in background and scan the map in every 5 seconds
 type DefaultCache struct {
 	mutex *sync.Mutex
 	val   map[string]*valueStruct
@@ -35,7 +42,8 @@ func NewDefaultClient() *DefaultCache {
 	return c
 }
 
-// Get will get value and extend TTL
+// Get will get value and extend TTL if exist.
+// If not, return 0 and false
 func (c *DefaultCache) Get(key string) (int, bool) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -52,7 +60,7 @@ func (c *DefaultCache) Get(key string) (int, bool) {
 	return val.value, ok
 }
 
-// SetWithTTL will set the key value, and set expiration ts
+// SetWithTTL will set the key value, and set expiration to 60 second
 func (c *DefaultCache) SetWithTTL(key string, value int) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -63,7 +71,8 @@ func (c *DefaultCache) SetWithTTL(key string, value int) {
 // Ping return nil
 func (c *DefaultCache) Ping() error { return nil }
 
-// Close will simply close done channel. all goroutines should exit when done channel closed
+// Close will simply close done channel.
+// all goroutines should monitor done channel and exit when done channel closed
 func (c *DefaultCache) Close() {
 	close(c.done)
 }
@@ -95,9 +104,11 @@ func (c *DefaultCache) Flush() {
 }
 
 // cronJob will run periodically in background
-// check if scan all values in map check if any is expired then delete them
+// scan all values in map and check if they are expired
+// if so, delete them
 func (c *DefaultCache) cronJob() {
-	tickCh := time.NewTicker(1 * time.Second)
+	// scan the map every 5 second
+	tickCh := time.NewTicker(5 * time.Second)
 
 	for {
 		select {

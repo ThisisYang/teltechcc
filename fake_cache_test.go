@@ -1,6 +1,7 @@
 package main
 
-// fakeCacheClient is used for testing purpose only
+// fakeCacheClient implemented cacheClient interface
+// and used for testing purpose only
 type fakeCacheClient struct {
 	val map[string]int
 	err error

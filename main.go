@@ -56,7 +56,7 @@ func main() {
 
 func waitSingal() {
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM) //syscall.SIGINT, syscall.SIGTERM
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
 	<-sigs
-	Debug.Println("received sigterm")
+	Debug.Println("received signal")
 }

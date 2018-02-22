@@ -8,7 +8,8 @@ import (
 
 var redisCounter = "hit"
 
-// RedisClient struct
+// RedisClient implemented cacheClient interface
+// use redis as cache backend
 type RedisClient struct {
 	client *redis.Client
 }
