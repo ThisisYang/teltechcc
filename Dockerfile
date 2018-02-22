@@ -1,6 +1,7 @@
 From golang:1.9.3 as builder
 WORKDIR /go/src/teltechcc/
 COPY . .
+RUN go get ./...
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o teltechcc .
 
 FROM alpine:latest
